@@ -194,6 +194,24 @@ async function captureSnapshot(cdp: CDPConnection): Promise<Snapshot | null> {
         const inputContainer = clone.querySelector('[contenteditable="true"]')?.closest('div[id^="cascade"] > div');
         if (inputContainer) inputContainer.remove();
         
+        // Convert canvas elements to images (for terminal output)
+        const originalCanvases = cascade.querySelectorAll('canvas');
+        const clonedCanvases = clone.querySelectorAll('canvas');
+        originalCanvases.forEach((originalCanvas, i) => {
+            try {
+                const clonedCanvas = clonedCanvases[i];
+                if (clonedCanvas && originalCanvas.width > 0 && originalCanvas.height > 0) {
+                    const dataUrl = originalCanvas.toDataURL('image/png');
+                    const img = document.createElement('img');
+                    img.src = dataUrl;
+                    img.style.cssText = clonedCanvas.getAttribute('style') || '';
+                    img.style.width = clonedCanvas.style.width || (originalCanvas.width + 'px');
+                    img.style.height = clonedCanvas.style.height || (originalCanvas.height + 'px');
+                    clonedCanvas.parentNode?.replaceChild(img, clonedCanvas);
+                }
+            } catch (e) { }
+        });
+        
         const html = clone.outerHTML;
         
         let allCSS = '';

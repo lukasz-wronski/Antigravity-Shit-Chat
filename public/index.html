@@ -228,8 +228,17 @@
                     /* Inject all CSS from Antigravity */
                     ${data.css}
                     
-                    /* Keep cascade scrollable but allow internal positioning */
+                    /* Reset positioning for layout, but preserve terminal rendering */
+                    #cascade *:not([class*="xterm"]):not([class*="terminal"]):not([class*="Terminal"]) {
+                        position: static !important;
+                    }
                     #cascade { position: relative !important; }
+                    
+                    /* Terminal needs its positioning to work */
+                    [class*="xterm"], [class*="terminal"], [class*="Terminal"],
+                    [class*="xterm"] *, [class*="terminal"] *, [class*="Terminal"] * {
+                        position: revert !important;
+                    }
                     
                     /* Use captured text color from Antigravity (works for any theme) */
                     #cascade, #cascade * {
@@ -254,6 +263,14 @@
                         background-image: none !important;
                         mask-image: none !important;
                         -webkit-mask-image: none !important;
+                    }
+                    
+                    /* Ensure terminal output shows fully */
+                    [class*="terminal"], [class*="xterm"], [class*="output"],
+                    pre, .monaco-editor, [class*="editor"] {
+                        max-height: none !important;
+                        height: auto !important;
+                        overflow: visible !important;
                     }
                 </style>
                 ${data.html}
